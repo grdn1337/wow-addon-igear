@@ -58,7 +58,6 @@ local EquipSlots = {
 	{"SecondaryHandSlot",	0, true,  0, 0, 0, true,  0, false, "", false, false},-- 16
 	{"RangedSlot",				0, true,  0, 0, 0, true,  0, false, "", false, false}	-- 17
 };
-iGear.E = EquipSlots;
 
 -- Yes, I prevent using key/value pairs in tables mostly, so every table index gets a name here:
 local S_NAME = 1;
