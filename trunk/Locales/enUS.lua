@@ -1,6 +1,8 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("iGear", "enUS", true)
 
+--@localization(locale="enUS", format="lua_additive_table", handle-unlocalized="english", escape-non-ascii=true, same-key-is-true=true)@
 
+--@do-not-package@
 L["HeadSlot"] = "Head"
 L["NeckSlot"] = "Neck"
 L["ShoulderSlot"] = "Shoulder"
@@ -27,3 +29,4 @@ L["Repair Costs"] = "Repair Costs"
 L["Gem"] = "Gem"
 L["Gems"] = "Gems"
 L["Enchant"] = "Enchant"
+--@end-do-not-package@
