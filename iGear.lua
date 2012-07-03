@@ -204,16 +204,18 @@ function iGear:GetSlotConflict(s, conflict)
 		return true;
 	end
 	
-	if( conflict == "repair" and s[S_CAN_REPAIR] and s[S_REPAIR_COST] ~= 0 ) then
-		return true;
-	end
-	
-	if( conflict == "enchant" and s[S_CAN_ENCHANT] and s[S_ENCHANT] == 0 ) then
-		return true;
-	end
-	
-	if( conflict == "gems" and s[S_GEMS_EMPTY] > 0 ) then
-		return true;
+	if( s[S_EQUIPPED] ) then
+		if( conflict == "repair" and s[S_CAN_REPAIR] and s[S_REPAIR_COST] ~= 0 ) then
+			return true;
+		end
+		
+		if( conflict == "enchant" and s[S_CAN_ENCHANT] and s[S_ENCHANT] == 0 ) then
+			return true;
+		end
+		
+		if( conflict == "gems" and s[S_GEMS_EMPTY] > 0 ) then
+			return true;
+		end
 	end
 	
 	return false;
@@ -460,15 +462,10 @@ function iGear:UpdateTooltip()
 			
 			line = Tooltip:AddLine(text_slot, text_conflict, text_durability, text_costs);
 			
-			if( conflicts_rep == 0 and conflicts_norep == 0 ) then
-				Tooltip:SetCell(line, 1, text_slot, nil, "LEFT", 4);
-				print(Tooltip:GetColumnCount().." SetCell: Text span")
-			elseif( conflicts_rep > 0 and conflicts_norep == 0 ) then
+			if( conflicts_rep > 0 and conflicts_norep == 0 ) then
 				Tooltip:SetCell(line, 1, text_slot, nil, "LEFT", 2);
-				print(Tooltip:GetColumnCount().." SetCell: Costs span")
 			elseif( conflicts_rep == 0 and conflicts_norep > 0 ) then
 				Tooltip:SetCell(line, 2, text_conflict, nil, "LEFT", 3);
-				print(Tooltip:GetColumnCount().." SetCell: Hint span");
 			end
 			
 			Tooltip:SetLineScript(line, "OnEnter", LineEnter, s[S_ID]);
