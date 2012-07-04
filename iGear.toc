@@ -1,6 +1,6 @@
 ## Interface: 50001
 ## Title: i|cffffffaaGear|r
-## Version: 2.0.0
+## Version: 2.0.1
 ## Notes: Not just a durability display broker!
 ## Author: grdn
 
