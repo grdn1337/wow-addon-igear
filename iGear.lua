@@ -245,6 +245,11 @@ function iGear:BankInteraction(isOpened)
 		self:UnregisterEvent("BAG_UPDATE");
 		isBanking = false;
 	end
+	
+	-- if tooltip is open, we refresh it
+	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
+		self:UpdateTooltip();
+	end
 end
 
 --------------------------
