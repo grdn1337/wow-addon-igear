@@ -139,6 +139,64 @@ function iGear:OnInitialize()
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED", "EventHandler");
 end
 
+----------------------
+-- EventHandler
+----------------------
+
+function iGear:EventHandler()
+	TotalRepairCosts = 0;
+	local smallest_durability = 100; -- iGear displays the smallest durability on the feed.
+	
+	local isEquipped, repCosts, durability, enchant;
+	
+	self:CheckWeaponSlots();
+	
+	for _, s in ipairs(EquipSlots) do
+		s[S_EQUIPPED] = false;
+		s[S_REPAIR_COST] = 0;
+		s[S_LINK] = "";
+		s[S_DURABILITY] = 0;
+		s[S_GEMS_EMPTY] = 0;
+		s[S_ENCHANT] = 0;
+		
+		isEquipped, repCosts = self:GetItemEquippedAndCost(s[S_ID]);
+				
+		if( isEquipped ) then
+			s[S_EQUIPPED] = true;
+			s[S_REPAIR_COST] = repCosts;
+			s[S_LINK] = _G.GetInventoryItemLink("player", s[S_ID]);
+						
+			-- check durability :)
+			durability = self:GetItemDurability(s);
+			if( durability ) then
+				s[S_DURABILITY] = durability;
+				
+				if( durability < smallest_durability ) then
+					smallest_durability = durability;
+				end
+				
+				TotalRepairCosts = TotalRepairCosts + repCosts;
+			end
+			
+			-- check misc stuff
+			s[S_GEMS_EMPTY] = self:GetNumMissingGems(s);
+			s[S_ENCHANT] = self:GetItemEnchant(s);
+		end
+	end
+	
+	--self.Feed.text = ("|cff%s%d%%|r"):format(LibCrayon:GetThresholdHexColor(smallest_durability, 100), smallest_durability);
+	self.Feed.text = self:FormatDurability(smallest_durability);
+	
+	local conflicts = self:GetNumConflicts();
+	if( conflicts ~= 0 ) then
+		self.Feed.text = ("|cffff0000%d!|r %s"):format(conflicts, self.Feed.text);
+	end
+	
+	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
+		self:UpdateTooltip();
+	end
+end
+
 --------------------------
 -- CheckWeaponSlots
 --------------------------
@@ -184,6 +242,11 @@ do
 			else
 				MH[S_MUST_EQUIP] = true;
 				OH[S_MUST_EQUIP] = true;
+			end
+			
+			-- no item type found, but item equipped? hah...
+			if( not mh and MH[S_EQUIPPED] ) then
+				LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 3, iGear); -- didn't want to add AceTimer to my addon object
 			end
 		end
 	end
@@ -349,64 +412,6 @@ function iGear:GetItemEnchant(s)
 	return tonumber(enchant);
 end
 
-----------------------
--- EventHandler
-----------------------
-
-function iGear:EventHandler(e)
-	TotalRepairCosts = 0;
-	local smallest_durability = 100; -- iGear displays the smallest durability on the feed.
-	
-	local isEquipped, repCosts, durability, enchant;
-	
-	self:CheckWeaponSlots();
-	
-	for _, s in ipairs(EquipSlots) do
-		s[S_EQUIPPED] = false;
-		s[S_REPAIR_COST] = 0;
-		s[S_LINK] = "";
-		s[S_DURABILITY] = 0;
-		s[S_GEMS_EMPTY] = 0;
-		s[S_ENCHANT] = 0;
-		
-		isEquipped, repCosts = self:GetItemEquippedAndCost(s[S_ID]);
-				
-		if( isEquipped ) then
-			s[S_EQUIPPED] = true;
-			s[S_REPAIR_COST] = repCosts;
-			s[S_LINK] = _G.GetInventoryItemLink("player", s[S_ID]);
-						
-			-- check durability :)
-			durability = self:GetItemDurability(s);
-			if( durability ) then
-				s[S_DURABILITY] = durability;
-				
-				if( durability < smallest_durability ) then
-					smallest_durability = durability;
-				end
-				
-				TotalRepairCosts = TotalRepairCosts + repCosts;
-			end
-			
-			-- check misc stuff
-			s[S_GEMS_EMPTY] = self:GetNumMissingGems(s);
-			s[S_ENCHANT] = self:GetItemEnchant(s);
-		end
-	end
-	
-	--self.Feed.text = ("|cff%s%d%%|r"):format(LibCrayon:GetThresholdHexColor(smallest_durability, 100), smallest_durability);
-	self.Feed.text = self:FormatDurability(smallest_durability);
-	
-	local conflicts = self:GetNumConflicts();
-	if( conflicts ~= 0 ) then
-		self.Feed.text = ("|cffff0000%d!|r %s"):format(conflicts, self.Feed.text);
-	end
-	
-	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
-		self:UpdateTooltip();
-	end
-end
-
 -----------------------
 -- UpdateTooltip
 -----------------------
@@ -435,10 +440,10 @@ function iGear:UpdateTooltip()
 	
 	local conflicts_rep   = self:GetNumConflicts("repair");
 	local conflicts_norep = self:GetNumConflicts("repair", 1);
-	--Tooltip:SetColumnLayout(1 + (conflicts_rep > 0 and 2 or 0) + (conflicts_norep > 0 and 1 or 0), "LEFT", "LEFT", "LEFT", "RIGHT");
 	Tooltip:SetColumnLayout(4, "LEFT", "LEFT", "LEFT", "RIGHT");
 	
-	Tooltip:AddHeader("Equip", "", "", "");
+	line = Tooltip:AddHeader("");
+	Tooltip:SetCell(line, 1, "Equip", nil, "LEFT", 4);
 	
 	for _, s in ipairs(EquipSlots) do
 		if( s[S_MUST_EQUIP] and self:GetNumSlotConflicts(s) > 0 ) then
@@ -473,12 +478,16 @@ function iGear:UpdateTooltip()
 	end
 	Tooltip:AddLine(" ");
 	
-	Tooltip:AddHeader("Inventory", "", "", "");
+	line = Tooltip:AddHeader("");
+	Tooltip:SetCell(line, 1, "Inventory", nil, "LEFT", 4);
+	line = Tooltip:AddLine("");
+	Tooltip:SetCell(line, 1, "|cffffff00Coming soon, guys!", nil, "LEFT", 4);
 	Tooltip:AddLine(" ");
 	
 	-- total repair costs
 	if( conflicts_rep > 0 ) then
-		Tooltip:AddHeader("Total Cost", "", "", "");
+		line = Tooltip:AddHeader("");
+		Tooltip:SetCell(line, 1, "Total Cost", nil, "LEFT", 4);
 		
 		local c;
 		
