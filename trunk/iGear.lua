@@ -340,15 +340,15 @@ function iGear:GetSlotConflictText(s)
 	local t = {};
 	
 	if( self:GetSlotConflict(s, "equip") ) then
-		table.insert(t, ("|cffff0000%s|r"):format("Eq"));
+		table.insert(t, ("|cffff0000%s|r"):format(L["Eq"]));
 	end
 	
 	if( self:GetSlotConflict(s, "enchant") ) then
-		table.insert(t, ("|cff00ffff%s|r"):format("En"));
+		table.insert(t, ("|cff00ffff%s|r"):format(L["En"]));
 	end
 	
 	if( self:GetSlotConflict(s, "gems") ) then
-		table.insert(t, ("|cffff00ff%d%s|r"):format(s[S_GEMS_EMPTY], "Ge"));
+		table.insert(t, ("|cffff00ff%d%s|r"):format(s[S_GEMS_EMPTY], L["Ge"]));
 	end
 	
 	return (#t > 0 and " " or "")..table.concat(t, ", ");
@@ -571,7 +571,7 @@ function iGear:UpdateTooltip()
 	Tooltip:SetColumnLayout(4, "LEFT", "LEFT", "LEFT", "RIGHT");
 	
 	line = Tooltip:AddHeader("");
-	Tooltip:SetCell(line, 1, "Equip", nil, "LEFT", 4);
+	Tooltip:SetCell(line, 1, L["Equip"], nil, "LEFT", 4);
 	
 	for _, s in ipairs(EquipSlots) do
 		if( s[S_MUST_EQUIP] and self:GetNumSlotConflicts(s) > 0 ) then
@@ -608,10 +608,10 @@ function iGear:UpdateTooltip()
 	
 	if( (BagRepairCosts + BankRepairCosts) > 0 ) then
 		line = Tooltip:AddHeader("");
-		Tooltip:SetCell(line, 1, "Inventory", nil, "LEFT", 4);
+		Tooltip:SetCell(line, 1, L["Inventory"], nil, "LEFT", 4);
 		
 		if( BagRepairCosts > 0 ) then
-			text_slot = (COLOR_GOLD):format("In Bags");
+			text_slot = (COLOR_GOLD):format(L["In Bags"]);
 			text_durability = self:FormatDurability(BagLowestDurability);
 			text_costs = self:FormatMoney(BagRepairCosts);
 			
@@ -622,7 +622,7 @@ function iGear:UpdateTooltip()
 		end
 		
 		if( BankRepairCosts > 0 ) then
-			text_slot = (COLOR_GOLD):format("At Bank");
+			text_slot = (COLOR_GOLD):format(L["At Bank"]);
 			text_durability = self:FormatDurability(BankLowestDurability);
 			text_costs = self:FormatMoney(BankRepairCosts);
 			
@@ -638,7 +638,7 @@ function iGear:UpdateTooltip()
 	-- total repair costs
 	if( conflicts_rep > 0 ) then
 		line = Tooltip:AddHeader("");
-		Tooltip:SetCell(line, 1, "Total Cost", nil, "LEFT", 4);
+		Tooltip:SetCell(line, 1, L["Total Cost"], nil, "LEFT", 4);
 		
 		local c;
 		
