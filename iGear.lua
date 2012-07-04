@@ -358,7 +358,9 @@ function iGear:GetSlotConflict(s, conflict)
 		return false;
 	end
 	
-	if( conflict == "equip" and s[S_MUST_EQUIP] and not s[S_EQUIPPED] and self.db.ConflictEquip ) then
+	local reqLevel = (_G.UnitLevel("player") >= self.db.ConflictLevel);
+	
+	if( conflict == "equip" and s[S_MUST_EQUIP] and not s[S_EQUIPPED] and reqLevel and self.db.ConflictEquip ) then
 		return true;
 	end
 	
@@ -367,34 +369,16 @@ function iGear:GetSlotConflict(s, conflict)
 			return true;
 		end
 		
-		if( conflict == "enchant" and s[S_CAN_ENCHANT] and s[S_ENCHANT] == 0 and self.db.ConflictEnchant ) then
+		if( conflict == "enchant" and s[S_CAN_ENCHANT] and s[S_ENCHANT] == 0 and reqLevel and self.db.ConflictEnchant ) then
 			return true;
 		end
 		
-		if( conflict == "gems" and s[S_GEMS_EMPTY] > 0 and self.db.ConflictGems ) then
+		if( conflict == "gems" and s[S_GEMS_EMPTY] > 0 and reqLevel and self.db.ConflictGems ) then
 			return true;
 		end
 	end
 	
 	return false;
-end
-
-function iGear:GetSlotConflictText(s)
-	local t = {};
-	
-	if( self:GetSlotConflict(s, "equip") ) then
-		table.insert(t, ("|cffff0000%s|r"):format(L["Eq"]));
-	end
-	
-	if( self:GetSlotConflict(s, "enchant") ) then
-		table.insert(t, ("|cff00ffff%s|r"):format(L["En"]));
-	end
-	
-	if( self:GetSlotConflict(s, "gems") ) then
-		table.insert(t, ("|cffff00ff%d%s|r"):format(s[S_GEMS_EMPTY], L["Ge"]));
-	end
-	
-	return (#t > 0 and " " or "")..table.concat(t, ", ");
 end
 
 function iGear:GetNumSlotConflicts(s, conflict, no)
@@ -429,6 +413,24 @@ function iGear:GetNumConflicts(conflict, no)
 	end
 	
 	return conflicts;
+end
+
+function iGear:GetSlotConflictText(s)
+	local t = {};
+	
+	if( self:GetSlotConflict(s, "equip") ) then
+		table.insert(t, ("|cffff0000%s|r"):format(L["Eq"]));
+	end
+	
+	if( self:GetSlotConflict(s, "enchant") ) then
+		table.insert(t, ("|cff00ffff%s|r"):format(L["En"]));
+	end
+	
+	if( self:GetSlotConflict(s, "gems") ) then
+		table.insert(t, ("|cffff00ff%d%s|r"):format(s[S_GEMS_EMPTY], L["Ge"]));
+	end
+	
+	return (#t > 0 and " " or "")..table.concat(t, ", ");
 end
 
 --------------------------

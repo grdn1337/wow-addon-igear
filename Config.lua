@@ -108,6 +108,28 @@ local function CreateConfig()
 					iGear:UpdateBroker();
 				end,
 			},
+			Spacer2 = {
+				type = "description",
+				name = " ",
+				order = 89,
+			},
+			ConflictLevel = {
+				type = "range",
+				name = "Required level in order to check for equip conflicts",
+				order = 90,
+				width = "full",
+				min = 10,
+				max = _G.MAX_PLAYER_LEVEL,
+				step = 1,
+				bigStep = 5,
+				get = function()
+					return iGear.db.ConflictLevel;
+				end,
+				set = function(info, value)
+					iGear.db.ConflictLevel = value;
+					iGear:UpdateBroker();
+				end,
+			},
 		},
 	};
 	
@@ -124,6 +146,7 @@ function iGear:CreateDB()
 		ConflictEquip = true,
 		ConflictEnchant = true,
 		ConflictGems = true,
+		ConflictLevel = (_G.MAX_PLAYER_LEVEL - 10),
 	}};
 end
 
