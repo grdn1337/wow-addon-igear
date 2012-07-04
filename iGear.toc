@@ -3,6 +3,7 @@
 ## Version: 2.0.1
 ## Notes: Not just a durability display broker!
 ## Author: grdn
+## SavedVariables: iGearDB
 
 # Libraries
 Libs\LibStub\Libstub.lua
