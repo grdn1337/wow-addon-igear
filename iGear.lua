@@ -17,7 +17,16 @@ local _G = _G; -- upvalueing done here since I always will call _G.func()
 -----------------------------------------
 
 local Tooltip; -- our QTip object
-local TotalRepairCosts = 0; -- calculated repaircosts
+
+local LowestDurability = 100; -- stores the lowest durability of an item
+local RepairCosts = 0; -- calculated repaircosts
+local BagLowestDurability = 100; -- stores the lowest durability of an item in bags
+local BagRepairCosts = 0; -- calculated bag repaircosts
+local BankLowestDurability = 100; -- stores the lowest durability of an item in bank
+local BankRepairCosts = 0; -- calculated bank repaircosts
+
+local isBanking = false; -- determines if we have opened the bank or not
+local isRepairing = false; -- determines if we are currently repairing or not
 
 local COLOR_GOLD = "|cfffed100%s|r";
 
@@ -137,19 +146,29 @@ function iGear:OnInitialize()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "EventHandler");
 	self:RegisterEvent("UPDATE_INVENTORY_DURABILITY", "EventHandler");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED", "EventHandler");
+	
+	self:RegisterEvent("MERCHANT_SHOW", "MerchantInteraction", true);
+	self:RegisterEvent("MERCHANT_CLOSED", "MerchantInteraction", false);
+	
+	self:RegisterEvent("BANKFRAME_OPENED", "BankInteraction", true);
+	self:RegisterEvent("BANKFRAME_CLOSED", "BankInteraction", false);
 end
 
 ----------------------
 -- EventHandler
 ----------------------
 
-function iGear:EventHandler()
-	TotalRepairCosts = 0;
-	local smallest_durability = 100; -- iGear displays the smallest durability on the feed.
+function iGear:EventHandler(event)
+	RepairCosts = 0;
+	LowestDurability = 100; -- iGear displays the lowest durability on the feed.
 	
 	local isEquipped, repCosts, durability, enchant;
 	
 	self:CheckWeaponSlots();
+	self:ScanBagsForRepCosts();
+	if( isBanking ) then
+		self:ScanBagsForRepCosts(true);
+	end
 	
 	for _, s in ipairs(EquipSlots) do
 		s[S_EQUIPPED] = false;
@@ -171,11 +190,11 @@ function iGear:EventHandler()
 			if( durability ) then
 				s[S_DURABILITY] = durability;
 				
-				if( durability < smallest_durability ) then
-					smallest_durability = durability;
+				if( durability < LowestDurability ) then
+					LowestDurability = durability;
 				end
 				
-				TotalRepairCosts = TotalRepairCosts + repCosts;
+				RepairCosts = RepairCosts + repCosts;
 			end
 			
 			-- check misc stuff
@@ -184,17 +203,57 @@ function iGear:EventHandler()
 		end
 	end
 	
-	--self.Feed.text = ("|cff%s%d%%|r"):format(LibCrayon:GetThresholdHexColor(smallest_durability, 100), smallest_durability);
-	self.Feed.text = self:FormatDurability(smallest_durability);
+	self.Feed.text = self:FormatDurability(LowestDurability);
 	
 	local conflicts = self:GetNumConflicts();
 	if( conflicts ~= 0 ) then
 		self.Feed.text = ("|cffff0000%d!|r %s"):format(conflicts, self.Feed.text);
 	end
 	
+	-- if tooltip is open, we refresh it
 	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
 		self:UpdateTooltip();
 	end
+end
+
+-----------------------------
+-- MerchantInteraction
+-----------------------------
+
+function iGear:MerchantInteraction(isMerchant)
+	-- we filter this event: only process if the merchant can repair!
+	if( isMerchant and not _G.CanMerchantRepair() ) then
+		return;
+	end
+	
+	if( isMerchant ) then
+		isRepairing = true;
+	else
+		isRepairing = false;
+	end
+	
+	-- if tooltip is open, we refresh it
+	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
+		self:UpdateTooltip();
+	end
+end
+
+-------------------------
+-- BankInteraction
+-------------------------
+
+function iGear:BankInteraction(isOpened)
+	if( isOpened ) then
+		self:RegisterEvent("BAG_UPDATE", "EventHandler");
+		
+		isBanking = true;
+		self:ScanBagsForRepCosts(true);
+	else
+		self:UnregisterEvent("BAG_UPDATE");
+		isBanking = false;
+	end
+	
+	--self:EventHandler("SELF_DUMP");
 end
 
 --------------------------
@@ -244,9 +303,9 @@ do
 				OH[S_MUST_EQUIP] = true;
 			end
 			
-			-- no item type found, but item equipped? hah...
+			-- no item type found, but item equipped? hah, game still not loaded...
 			if( not mh and MH[S_EQUIPPED] ) then
-				LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 3, iGear); -- didn't want to add AceTimer to my addon object
+				LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 3, iGear); -- dirrRRty, didn't want to add AceTimer to my addon object
 			end
 		end
 	end
@@ -412,12 +471,87 @@ function iGear:GetItemEnchant(s)
 	return tonumber(enchant);
 end
 
+function iGear:ScanBagsForRepCosts(scanBank)
+	local _, current, maximum, repair;
+	
+	local bags;
+	if( not scanBank ) then
+		BagRepairCosts = 0;
+		BagLowestDurability = 100;
+		bags = {0, 1, 2, 3, 4};
+	else
+		BankRepairCosts = 0;
+		BankLowestDurability = 100;
+		bags = {-1, 5, 6, 7, 8, 9, 10, 11};
+	end
+	
+	local repairValue, durabilityValue = 0, 100;
+	
+	--for bag = 0, 4 do
+	for i, bag in ipairs(bags) do
+		for slot = 1, _G.GetContainerNumSlots(bag) do
+			current, maximum = _G.GetContainerItemDurability(bag, slot);
+			_, repair = _G.iGearScanTip:SetBagItem(bag, slot);
+			
+			if( current and maximum and repair ) then				
+				repairValue = repairValue + repair; -- add to bag repair costs
+				
+				current = 100 * current / maximum;
+				
+				if( current - abs(current) >= 0.5 ) then
+					current = ceil(current);
+				else
+					current = floor(current);
+				end
+				
+				if( current < durabilityValue ) then
+					durabilityValue = current;
+				end
+			end
+		end
+	end
+	
+	if( not scanBank ) then
+		BagRepairCosts = repairValue;
+		BagLowestDurability = durabilityValue;
+	else
+		BankRepairCosts = repairValue;
+		BankLowestDurability = durabilityValue;
+	end
+end
+
 -----------------------
 -- UpdateTooltip
 -----------------------
 
 function iGear:FormatDurability(durability)
 	return ("|cff%s%d%%|r"):format(LibCrayon:GetThresholdHexColor(durability, 100), durability);
+end
+
+function iGear:FormatMoney(value, standing)
+	local discount = self:GetRepairDiscount(standing);
+	
+	value = value * discount;
+	
+	return _G.GetMoneyString(value);
+end
+
+function iGear:GetRepairDiscount(standing, returnStanding)
+	if( not standing and isRepairing ) then
+		standing = _G.UnitReaction("npc", "player");
+		
+		if( returnStanding ) then
+			return standing;
+		end
+	end
+	
+	local discount = 1; -- 100 % cost
+	
+	if( standing and standing > 4 ) then
+		discount = 1 - (standing - 4) * 0.05;
+	end
+	
+	return discount;
 end
 
 local function LineEnter(anchor, slotNum)
@@ -458,7 +592,7 @@ function iGear:UpdateTooltip()
 			
 			if( self:GetSlotConflict(s, "repair") ) then
 				text_durability = self:FormatDurability(s[S_DURABILITY]);
-				text_costs = _G.GetMoneyString(s[S_REPAIR_COST]);
+				text_costs = self:FormatMoney(s[S_REPAIR_COST]);
 			else
 				text_durability = "";
 				text_costs = "";
@@ -478,11 +612,34 @@ function iGear:UpdateTooltip()
 	end
 	Tooltip:AddLine(" ");
 	
-	line = Tooltip:AddHeader("");
-	Tooltip:SetCell(line, 1, "Inventory", nil, "LEFT", 4);
-	line = Tooltip:AddLine("");
-	Tooltip:SetCell(line, 1, "|cffffff00Coming soon, guys!", nil, "LEFT", 4);
-	Tooltip:AddLine(" ");
+	if( (BagRepairCosts + BankRepairCosts) > 0 ) then
+		line = Tooltip:AddHeader("");
+		Tooltip:SetCell(line, 1, "Inventory", nil, "LEFT", 4);
+		
+		if( BagRepairCosts > 0 ) then
+			text_slot = (COLOR_GOLD):format("In Bags");
+			text_durability = self:FormatDurability(BagLowestDurability);
+			text_costs = self:FormatMoney(BagRepairCosts);
+			
+			line = Tooltip:AddLine(text_slot, "", text_durability, text_costs);
+			if( conflicts_norep == 0 ) then
+				Tooltip:SetCell(line, 1, text_slot, nil, "LEFT", 2);
+			end
+		end
+		
+		if( BankRepairCosts > 0 ) then
+			text_slot = (COLOR_GOLD):format("At Bank");
+			text_durability = self:FormatDurability(BankLowestDurability);
+			text_costs = self:FormatMoney(BankRepairCosts);
+			
+			line = Tooltip:AddLine(text_slot, "", text_durability, text_costs);
+			if( conflicts_norep == 0 ) then
+				Tooltip:SetCell(line, 1, text_slot, nil, "LEFT", 2);
+			end
+		end
+		
+		Tooltip:AddLine(" ");
+	end
 	
 	-- total repair costs
 	if( conflicts_rep > 0 ) then
@@ -496,7 +653,11 @@ function iGear:UpdateTooltip()
 			c = _G.FACTION_BAR_COLORS[i];
 			
 			Tooltip:SetCell(line, 1, ("|cff%02x%02x%02x%s|r"):format(c.r *255, c.g *255, c.b *255, _G["FACTION_STANDING_LABEL"..i]), nil, "LEFT", 3);
-			Tooltip:SetCell(line, 4, _G.GetMoneyString(floor(TotalRepairCosts * (i > 4 and (1-(i-4)*0.05) or 1))), nil, "RIGHT");
+			Tooltip:SetCell(line, 4, self:FormatMoney( (RepairCosts + BagRepairCosts), i), nil, "RIGHT");
+			
+			if( self:GetRepairDiscount(nil, true) == i ) then
+				Tooltip:SetLineColor(line, c.r, c.g, c.b, 0.4);
+			end
 		end
 	end
 end

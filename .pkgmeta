@@ -3,6 +3,7 @@ enable-nolib-creation: no
 
 ignore:
   - Libs/AceAddon-3.0
+  - Libs/AceBucket-3.0
   - Libs/AceConfig-3.0
   - Libs/AceDB-3.0
   - Libs/AceEvent-3.0
@@ -25,6 +26,8 @@ externals:
     url: svn://svn.wowace.com/wow/libcrayon-3-0/mainline/trunk
   Libs/AceAddon-3.0:
     url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
+  Libs/AceBucket-3.0:
+    url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceBucket-3.0
   Libs/AceGUI-3.0:
     url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
   Libs/AceConfig-3.0:
