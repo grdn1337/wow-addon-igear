@@ -1,4 +1,4 @@
-## Interface: 50001
+## Interface: 40300
 ## Title: i|cffffffaaGear|r
 ## Version: 2.0.1
 ## Notes: Not just a durability display broker!
