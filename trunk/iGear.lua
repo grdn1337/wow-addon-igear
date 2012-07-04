@@ -123,7 +123,10 @@ end
 ----------------------
 
 function iGear:OnInitialize()
-	-- on first run, we fetch the slot IDs by their slot name by some API calls. Why? Slot IDs could change, slot names doesn't ever change.
+	self.db = LibStub("AceDB-3.0"):New("iGearDB", self:CreateDB(), "Default").profile;
+	
+	-- on first run, we fetch the slot IDs by their slot name by some API calls. Why?
+	-- Slot IDs could change, slot names doesn't ever change.
 	for _, slot in ipairs(EquipSlots) do
 		slot[S_ID] = _G.GetInventorySlotInfo(slot[S_NAME]);
 	end
@@ -218,6 +221,7 @@ function iGear:MerchantInteraction(isMerchant)
 	
 	if( isMerchant ) then
 		isRepairing = true;
+		self:MerchantAutoRepair();
 	else
 		isRepairing = false;
 	end
@@ -226,6 +230,41 @@ function iGear:MerchantInteraction(isMerchant)
 	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
 		self:UpdateTooltip();
 	end
+end
+
+function iGear:MerchantAutoRepair()
+	if( not isRepairing or not self.db.AutoRepair or (RepairCosts + BagRepairCosts) == 0 ) then
+		return;
+	end
+	
+	if( self.db.AutoRepairMode == 1 ) then
+		if( self.db.AutoRepairGuild ) then
+			self:MerchantDoGuildRepair(true);
+		else
+			self:MerchantDoRepair();
+		end
+	else
+		_G.StaticPopupDialogs["IGEAR_AUTOREPAIR"].text =
+			("%s\n%s: %s"):format("Who is paying the bill?", L["Total Cost"], self:FormatMoney(RepairCosts + BagRepairCosts));
+		_G.StaticPopup_Show("IGEAR_AUTOREPAIR");
+	end
+end
+
+function iGear:MerchantDoRepair()
+	_G.RepairAllItems();
+end
+
+function iGear:MerchantCanGuildRepair()
+	return (_G.CanGuildBankRepair() and _G.GetGuildBankWithdrawMoney() > (RepairCosts + BagRepairCosts) );
+end
+
+function iGear:MerchantDoGuildRepair()
+	if( self:MerchantCanGuildRepair() ) then
+		_G.RepairAllItems(1);
+		return;
+	end
+	
+	self:MerchantDoRepair();
 end
 
 -------------------------
@@ -655,3 +694,28 @@ function iGear:UpdateTooltip()
 		end
 	end
 end
+
+---------------------
+-- Final stuff
+---------------------
+
+_G.StaticPopupDialogs["IGEAR_AUTOREPAIR"] = {
+	preferredIndex = 3, -- apparently avoids some UI taint
+	button1 = "Me",
+	button2 = "Cancel",
+	button3 = "Guild",
+	showAlert = 1,
+	timeout = 0,
+	hideOnEscape = true,
+	OnShow = function(self)
+		if( not iGear:MerchantCanGuildRepair() ) then
+			self.button3:Disable();
+		end
+	end,
+	OnAccept = function()
+		iGear:MerchantDoRepair();
+	end,
+	OnAlt = function()
+		iGear:MerchantDoGuildRepair();
+	end,
+};
