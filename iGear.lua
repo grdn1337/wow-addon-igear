@@ -128,9 +128,6 @@ function iGear:OnInitialize()
 		slot[S_ID] = _G.GetInventorySlotInfo(slot[S_NAME]);
 	end
 	
-	--self:RegisterEvent("PLAYER_DEAD", "EventHandler");
-	--self:RegisterEvent("PLAYER_UNGHOST", "EventHandler");
-	--self:RegisterEvent("PLAYER_ENTERING_WORLD", "EventHandler");
 	self.bucket = self:RegisterBucketEvent(
 		{
 			"PLAYER_DEAD",
