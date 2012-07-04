@@ -288,9 +288,9 @@ do
 			if( mh == "INVTYPE_2HWEAPON" ) then
 				MH[S_MUST_EQUIP] = true;
 				
-				--if( class == "WARRIOR" and _G.GetSpecialization() == 2 ) then -- Furor warriors have TitanGrip
-				--	OH[S_MUST_EQUIP] = true;
-				--end
+				if( class == "WARRIOR" and _G.GetSpecialization() == 2 ) then -- Furor warriors have TitanGrip
+					OH[S_MUST_EQUIP] = true;
+				end
 			else
 				MH[S_MUST_EQUIP] = true;
 				OH[S_MUST_EQUIP] = true;
