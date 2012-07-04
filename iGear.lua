@@ -3,7 +3,7 @@
 -----------------------------------
 
 local AddonName = select(1, ...);
-iGear = LibStub("AceAddon-3.0"):NewAddon(AddonName, "AceEvent-3.0");
+iGear = LibStub("AceAddon-3.0"):NewAddon(AddonName, "AceEvent-3.0", "AceBucket-3.0");
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddonName);
 
@@ -82,19 +82,6 @@ local S_LINK = 10;
 local S_MUST_EQUIP = 11;
 local S_USED = 12;
 
--- clears a table and frees memory on the next garbage collect
-local function tclear(t, wipe)
-	if( type(t) ~= "table" ) then return end;
-	for k in pairs(t) do
-		t[k] = nil;
-	end
-	t[''] = 1;
-	t[''] = nil;
-	if( wipe ) then
-		t = nil;
-	end
-end
-
 -----------------------------
 -- Setting up the feed
 -----------------------------
@@ -141,11 +128,17 @@ function iGear:OnInitialize()
 		slot[S_ID] = _G.GetInventorySlotInfo(slot[S_NAME]);
 	end
 	
-	self:RegisterEvent("PLAYER_DEAD", "EventHandler");
-	self:RegisterEvent("PLAYER_UNGHOST", "EventHandler");
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "EventHandler");
-	self:RegisterEvent("UPDATE_INVENTORY_DURABILITY", "EventHandler");
-	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED", "EventHandler");
+	--self:RegisterEvent("PLAYER_DEAD", "EventHandler");
+	--self:RegisterEvent("PLAYER_UNGHOST", "EventHandler");
+	--self:RegisterEvent("PLAYER_ENTERING_WORLD", "EventHandler");
+	self.bucket = self:RegisterBucketEvent(
+		{
+			"PLAYER_DEAD",
+			"PLAYER_UNGHOST",
+			"PLAYER_ENTERING_WORLD",
+			"PLAYER_EQUIPMENT_CHANGED",
+			"UPDATE_INVENTORY_DURABILITY"
+		}, 0.5, "EventHandler");
 	
 	self:RegisterEvent("MERCHANT_SHOW", "MerchantInteraction", true);
 	self:RegisterEvent("MERCHANT_CLOSED", "MerchantInteraction", false);
@@ -158,7 +151,7 @@ end
 -- EventHandler
 ----------------------
 
-function iGear:EventHandler(event)
+function iGear:EventHandler()
 	RepairCosts = 0;
 	LowestDurability = 100; -- iGear displays the lowest durability on the feed.
 	
@@ -252,8 +245,6 @@ function iGear:BankInteraction(isOpened)
 		self:UnregisterEvent("BAG_UPDATE");
 		isBanking = false;
 	end
-	
-	--self:EventHandler("SELF_DUMP");
 end
 
 --------------------------
@@ -303,9 +294,10 @@ do
 				OH[S_MUST_EQUIP] = true;
 			end
 			
-			-- no item type found, but item equipped? hah, game still not loaded...
-			if( not mh and MH[S_EQUIPPED] ) then
-				LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 3, iGear); -- dirrRRty, didn't want to add AceTimer to my addon object
+			-- mh isn't set, that means the UI isn't fully loaded and values are wrong
+			-- We give the UI half a second to load until we reload this! :)
+			if( not mh ) then
+				LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 0.5, iGear); -- didn't want to add AceTimer to my addon object
 			end
 		end
 	end
