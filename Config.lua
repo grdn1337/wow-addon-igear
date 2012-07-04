@@ -62,6 +62,52 @@ local function CreateConfig()
 					[2] = "Popup Dialog"
 				},
 			},
+			Spacer1 = {
+				type = "description",
+				name = " ",
+				order = 49,
+			},
+			EmptyLine2 = {
+				type = "header",
+				name = "Conflicts",
+				order = 50,
+			},
+			ConflictEquip = {
+				type = "toggle",
+				name = "Missing Equip",
+				order = 60,
+				get = function()
+					return iGear.db.ConflictEquip;
+				end,
+				set = function(info, value)
+					iGear.db.ConflictEquip = value;
+					iGear:UpdateBroker();
+				end,
+			},
+			ConflictEnchant = {
+				type = "toggle",
+				name = "Missing Enchants",
+				order = 70,
+				get = function()
+					return iGear.db.ConflictEnchant;
+				end,
+				set = function(info, value)
+					iGear.db.ConflictEnchant = value;
+					iGear:UpdateBroker();
+				end,
+			},
+			ConflictGems = {
+				type = "toggle",
+				name = "Missing Gems",
+				order = 80,
+				get = function()
+					return iGear.db.ConflictGems;
+				end,
+				set = function(info, value)
+					iGear.db.ConflictGems = value;
+					iGear:UpdateBroker();
+				end,
+			},
 		},
 	};
 	
@@ -75,6 +121,9 @@ function iGear:CreateDB()
 		AutoRepair = false,
 		AutoRepairMode = 2,
 		AutoRepairGuild = false,
+		ConflictEquip = true,
+		ConflictEnchant = true,
+		ConflictGems = true,
 	}};
 end
 

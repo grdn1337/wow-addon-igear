@@ -151,6 +151,15 @@ end
 -- EventHandler
 ----------------------
 
+function iGear:UpdateBroker()
+	self.Feed.text = self:FormatDurability(LowestDurability);
+	
+	local conflicts = self:GetNumConflicts("repair", true);
+	if( conflicts > 0 ) then
+		self.Feed.text = ("|cffff0000%d!|r %s"):format(conflicts, self.Feed.text);
+	end
+end
+
 function iGear:EventHandler()
 	RepairCosts = 0;
 	LowestDurability = 100; -- iGear displays the lowest durability on the feed.
@@ -196,12 +205,7 @@ function iGear:EventHandler()
 		end
 	end
 	
-	self.Feed.text = self:FormatDurability(LowestDurability);
-	
-	local conflicts = self:GetNumConflicts();
-	if( conflicts ~= 0 ) then
-		self.Feed.text = ("|cffff0000%d!|r %s"):format(conflicts, self.Feed.text);
-	end
+	self:UpdateBroker();
 	
 	-- if tooltip is open, we refresh it
 	if( LibQTip:IsAcquired("iSuite"..AddonName) ) then
@@ -354,7 +358,7 @@ function iGear:GetSlotConflict(s, conflict)
 		return false;
 	end
 	
-	if( conflict == "equip" and s[S_MUST_EQUIP] and not s[S_EQUIPPED] ) then
+	if( conflict == "equip" and s[S_MUST_EQUIP] and not s[S_EQUIPPED] and self.db.ConflictEquip ) then
 		return true;
 	end
 	
@@ -363,11 +367,11 @@ function iGear:GetSlotConflict(s, conflict)
 			return true;
 		end
 		
-		if( conflict == "enchant" and s[S_CAN_ENCHANT] and s[S_ENCHANT] == 0 ) then
+		if( conflict == "enchant" and s[S_CAN_ENCHANT] and s[S_ENCHANT] == 0 and self.db.ConflictEnchant ) then
 			return true;
 		end
 		
-		if( conflict == "gems" and s[S_GEMS_EMPTY] > 0 ) then
+		if( conflict == "gems" and s[S_GEMS_EMPTY] > 0 and self.db.ConflictGems ) then
 			return true;
 		end
 	end
@@ -606,7 +610,7 @@ function iGear:UpdateTooltip()
 	local text_slot, text_conflict, text_durability, text_costs;
 	
 	local conflicts_rep   = self:GetNumConflicts("repair");
-	local conflicts_norep = self:GetNumConflicts("repair", 1);
+	local conflicts_norep = self:GetNumConflicts("repair", true);
 	Tooltip:SetColumnLayout(4, "LEFT", "LEFT", "LEFT", "RIGHT");
 	
 	line = Tooltip:AddHeader("");
