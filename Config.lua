@@ -2,64 +2,67 @@
 -- Get the addon table
 -----------------------------
 
-local AddonName = select(1, ...);
-local iGear = LibStub("AceAddon-3.0"):GetAddon(AddonName);
+local AddonName, iGear = ...;
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddonName);
+
+local _G = _G;
+
+--------------------------
+-- The option table
+--------------------------
+
+function iGear:CreateDB()
+	return { profile = {
+		AutoRepair = false,
+		AutoRepairMode = 2,
+		AutoRepairGuild = false,
+		ConflictEquip = true,
+		ConflictEnchant = true,
+		ConflictGems = true,
+		ConflictLevel = (_G.MAX_PLAYER_LEVEL - 10),
+	}};
+end
 
 ---------------------------------
 -- The configuration table
 ---------------------------------
 
 local function CreateConfig()
-	CreateConfig = nil; -- we just need this function once, thus removing it from memory.
-
-	local db = {
+	return {
 		type = "group",
 		name = AddonName,
 		order = 1,
+		get = function(info)
+			return iGear.db[info[#info]];
+		end,
+		set = function(info, value)
+			iGear.db[info[#info]] = value;
+		end,
 		args = {
 			EmptyLine1 = {
 				type = "header",
-				name = "Auto Repair",
+				name = L["Auto Repair"],
 				order = 10,
 			},
 			AutoRepair = {
 				type = "toggle",
-				name = "Enable",
+				name = _G.ENABLE,
 				order = 20,
-				get = function()
-					return iGear.db.AutoRepair;
-				end,
-				set = function(info, value)
-					iGear.db.AutoRepair = value;
-				end,
 			},
 			AutoRepairGuild = {
 				type = "toggle",
-				name = "Try Guild Repair",
-				desc = "If Action is set to Auto Repair, trys using Guild money for repairs. If it fails, falls back to your money!",
+				name = L["Try Guild Repair"],
+				desc = L["If Action is set to Auto Repair, trys using Guild money for repairs. If it fails, falls back to your money!"],
 				order = 30,
-				get = function()
-					return iGear.db.AutoRepairGuild;
-				end,
-				set = function(info, value)
-					iGear.db.AutoRepairGuild = value;
-				end,
 			},
 			AutoRepairMode = {
 				type = "select",
-				name = "Action",
+				name = L["Action"],
 				order = 40,
-				get = function()
-					return iGear.db.AutoRepairMode;
-				end,
-				set = function(info, value)
-					iGear.db.AutoRepairMode = value;
-				end,
 				values = {
-					[1] = "Auto Repair",
-					[2] = "Popup Dialog"
+					[1] = L["Auto Repair"],
+					[2] = L["Popup Dialog"]
 				},
 			},
 			Spacer1 = {
@@ -69,16 +72,13 @@ local function CreateConfig()
 			},
 			EmptyLine2 = {
 				type = "header",
-				name = "Conflicts",
+				name = L["Conflicts"],
 				order = 50,
 			},
 			ConflictEquip = {
 				type = "toggle",
-				name = "Missing Equip",
+				name = L["Missing Equip"],
 				order = 60,
-				get = function()
-					return iGear.db.ConflictEquip;
-				end,
 				set = function(info, value)
 					iGear.db.ConflictEquip = value;
 					iGear:UpdateBroker();
@@ -86,11 +86,8 @@ local function CreateConfig()
 			},
 			ConflictEnchant = {
 				type = "toggle",
-				name = "Missing Enchants",
+				name = L["Missing Enchants"],
 				order = 70,
-				get = function()
-					return iGear.db.ConflictEnchant;
-				end,
 				set = function(info, value)
 					iGear.db.ConflictEnchant = value;
 					iGear:UpdateBroker();
@@ -98,11 +95,8 @@ local function CreateConfig()
 			},
 			ConflictGems = {
 				type = "toggle",
-				name = "Missing Gems",
+				name = L["Missing Gems"],
 				order = 80,
-				get = function()
-					return iGear.db.ConflictGems;
-				end,
 				set = function(info, value)
 					iGear.db.ConflictGems = value;
 					iGear:UpdateBroker();
@@ -115,16 +109,13 @@ local function CreateConfig()
 			},
 			ConflictLevel = {
 				type = "range",
-				name = "Required level in order to check for equip conflicts",
+				name = L["Required level in order to check for equip conflicts"],
 				order = 90,
 				width = "full",
 				min = 10,
 				max = _G.MAX_PLAYER_LEVEL,
 				step = 1,
 				bigStep = 5,
-				get = function()
-					return iGear.db.ConflictLevel;
-				end,
 				set = function(info, value)
 					iGear.db.ConflictLevel = value;
 					iGear:UpdateBroker();
@@ -132,22 +123,6 @@ local function CreateConfig()
 			},
 		},
 	};
-	
-	return db;
-end
-
-function iGear:CreateDB()
-	iGear.CreateDB = nil;
-	
-	return { profile = {
-		AutoRepair = false,
-		AutoRepairMode = 2,
-		AutoRepairGuild = false,
-		ConflictEquip = true,
-		ConflictEnchant = true,
-		ConflictGems = true,
-		ConflictLevel = (_G.MAX_PLAYER_LEVEL - 10),
-	}};
 end
 
 function iGear:OpenOptions()
