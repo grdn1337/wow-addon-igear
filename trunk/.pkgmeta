@@ -1,19 +1,6 @@
 package-as: iGear
 enable-nolib-creation: no
 
-ignore:
-  - Libs/AceBucket-3.0
-  - Libs/AceConfig-3.0
-  - Libs/AceDB-3.0
-  - Libs/AceEvent-3.0
-  - Libs/AceGUI-3.0
-  - Libs/AceLocale-3.0
-  - Libs/AceTimer-3.0
-  - Libs/CallbackHandler-1.0
-  - Libs/LibCrayon-3.0
-  - Libs/LibStub
-  - Libs/iLib
-
 externals:
   Libs/CallbackHandler-1.0:
     url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk
@@ -39,6 +26,7 @@ externals:
     url: svn://svn.curseforge.net/wow/ilib/mainline/trunk
 
 optional-dependencies:
+  - ace3
   - ilib
   - libcrayon-3-0
 
