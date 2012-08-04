@@ -7,6 +7,7 @@ if not L then return end
 
 --@do-not-package@
 L["Action"] = "Aktion"
+L["Addon update available!"] = "Addon Update verf\195\188gbar!"
 L["At Bank"] = "Auf Bank"
 L["Auto Repair"] = "Auto-Reparatur"
 L["BackSlot"] = "Umhang"
@@ -42,5 +43,4 @@ L["Try Guild Repair"] = "Gilden-Reparatur"
 L["WaistSlot"] = "Taille"
 L["Who is paying the bill?"] = "Wer zahlt die Rechnung?"
 L["WristSlot"] = "Handgelenke"
-
 --@end-do-not-package@

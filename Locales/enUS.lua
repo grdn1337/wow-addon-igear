@@ -22,6 +22,8 @@ L["MainHandSlot"] = "Mainhand"
 L["SecondaryHandSlot"] = "Offhand"
 L["RangedSlot"] = "Ranged"
 
+L["Addon update available!"] = true
+
 L["Equip"] = true
 L["Inventory"] = true
 L["In Bags"] = true
