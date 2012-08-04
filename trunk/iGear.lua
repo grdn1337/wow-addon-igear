@@ -73,7 +73,8 @@ local EquipSlots = {
 	{"Trinket1Slot",			0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 14
 	{"MainHandSlot",			0, true,  0, 0, 0, true,  0, false, "", false, false},-- 15
 	{"SecondaryHandSlot",	0, true,  0, 0, 0, true,  0, false, "", false, false},-- 16
-	{"RangedSlot",				0, true,  0, 0, 0, true,  0, false, "", false, false}	-- 17
+	-- the ranged slot got completely removed
+	--{"RangedSlot",				0, true,  0, 0, 0, true,  0, false, "", false, false}	-- 17
 };
 
 do
@@ -336,24 +337,23 @@ do
 	-- Here I define some indexes for the EquipSlots table - all three Weapon Slots (Mainhand, Offhand, RangedWeapon)
 	local MH = EquipSlots[15];
 	local OH = EquipSlots[16];
-	local RW = EquipSlots[17];
+	--local RW = EquipSlots[17];
 	
-	-- Two Hand OR Main/Off Hand:	Warrior, Paladin, DeathKnight, Priest, Mage, Warlock, Druid, Shaman, Monk
+	-- Two Hand OR Main/Off Hand:	Warrior, Paladin, DeathKnight, Priest, Mage, Warlock, Druid, Shaman, Monk, Hunter
 	-- Main/Off Hand:							Rogue
-	-- Just Ranged:								Hunter
 	
 	function iGear:CheckWeaponSlots()
 		MH.mustEquip = false;
 		OH.mustEquip = false;
-		RW.mustEquip = false;
+		--RW.mustEquip = false;
 		
 		-----------------------
 		-- these two are easy!
 		if( class == "ROGUE" ) then
 			MH.mustEquip = true;
 			OH.mustEquip = true;
-		elseif( class == "HUNTER" ) then
-			RW.mustEquip = true;
+		--elseif( class == "HUNTER" ) then
+			--RW.mustEquip = true;
 		-- end easiness :D
 		-----------------------
 		else
@@ -721,6 +721,12 @@ function iGear:UpdateTooltip(tip)
 				tip:SetLineColor(line, c.r, c.g, c.b, 0.4);
 			end
 		end
+	end
+	
+	if( LibStub("iLib"):IsUpdate(AddonName) ) then
+		tip:AddSeparator();
+		line = tip:AddLine("");
+		tip:SetCell(line, 1, "|cffff0000"..L["Addon update available!"].."|r", nil, "CENTER", 0);
 	end
 end
 
