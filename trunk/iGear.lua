@@ -686,7 +686,7 @@ function iGear:UpdateTooltip(tip)
 			
 			line = tip:AddLine(text_slot, "", text_durability, text_costs);
 			if( conflicts_norep == 0 ) then
-				Tooltip:SetCell(line, 1, text_slot, nil, "LEFT", 2);
+				tip:SetCell(line, 1, text_slot, nil, "LEFT", 2);
 			end
 		end
 		
