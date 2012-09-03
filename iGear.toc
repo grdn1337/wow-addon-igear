@@ -1,6 +1,6 @@
 ## Interface: 50001
 ## Title: i|cffffffaaGear|r
-## Version: 2.1.3
+## Version: 2.1.4
 ## Notes: Not just a durability display broker!
 ## Author: grdn
 ## SavedVariables: iGearDB

@@ -55,7 +55,7 @@ local COLOR_GOLD = "|cfffed100%s|r";
 --  - b 12: indicates whether the Slot is used by the class or not
 local EquipSlots = {
 --   1           				2  3      4  5  6  7      8  9      10, 11		 12
-	{"HeadSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 1
+	{"HeadSlot",					0, true,  0, 0, 0, false, 0, false, "", true,  true},	-- 1
 	{"NeckSlot",					0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 2
 	{"ShoulderSlot",			0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 3
 	{"BackSlot",					0, false, 0, 0, 0, true,  0, false, "", true,  true},	-- 4
@@ -181,6 +181,8 @@ function iGear:Boot()
 	self:RegisterEvent("BANKFRAME_CLOSED", "BankInteraction", false);
 	
 	self:EventHandler();
+	
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 end
 iGear:RegisterEvent("PLAYER_ENTERING_WORLD", "Boot");
 
@@ -337,24 +339,23 @@ do
 	-- Here I define some indexes for the EquipSlots table - all three Weapon Slots (Mainhand, Offhand, RangedWeapon)
 	local MH = EquipSlots[15];
 	local OH = EquipSlots[16];
-	--local RW = EquipSlots[17];
 	
-	-- Two Hand OR Main/Off Hand:	Warrior, Paladin, DeathKnight, Priest, Mage, Warlock, Druid, Shaman, Monk, Hunter
+	-- Two Hand OR Main/Off Hand:	Warrior, Paladin, DeathKnight, Priest, Mage, Warlock, Druid, Shaman, Monk
+	-- Just Mainhand:							Hunter
 	-- Main/Off Hand:							Rogue
 	
 	function iGear:CheckWeaponSlots()
 		MH.mustEquip = false;
 		OH.mustEquip = false;
-		--RW.mustEquip = false;
 		
 		-----------------------
 		-- these two are easy!
 		if( class == "ROGUE" ) then
 			MH.mustEquip = true;
 			OH.mustEquip = true;
-		--elseif( class == "HUNTER" ) then
-			--RW.mustEquip = true;
-		-- end easiness :D
+		elseif( class == "HUNTER" ) then
+			MH.mustEquip = true;
+		--end easiness :D
 		-----------------------
 		else
 			local _, _, _, _, _, _, _, _, mh, _, _ = _G.GetItemInfo(MH.link);
@@ -531,9 +532,7 @@ function iGear:GetItemDurability(slot)
 end
 
 function iGear:GetItemEnchant(slot)
-	local _, _, color, enchant, name =
-		string.find(slot.link,"|c%x%x(%x*)|Hitem:%d+:(%d+):%d+:%d+:%d+:%d+:%-?%d+:%-?%d+:%d+:%d+|h%[([^%]]*)%]");
-	
+	local _, _, enchant = string.find(slot.link, "item:%d+:(%d)");
 	return tonumber(enchant);
 end
 
