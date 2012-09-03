@@ -13,6 +13,8 @@ local _G = _G;
 --------------------------
 
 function iGear:CreateDB()
+	iGear.CreateDB = nil;
+	
 	return { profile = {
 		AutoRepair = false,
 		AutoRepairMode = 2,
