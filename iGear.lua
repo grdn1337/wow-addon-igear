@@ -171,7 +171,8 @@ function iGear:Boot()
 			"PLAYER_DEAD",
 			"PLAYER_UNGHOST",
 			"PLAYER_EQUIPMENT_CHANGED",
-			"UPDATE_INVENTORY_DURABILITY"
+			"UPDATE_INVENTORY_DURABILITY",
+			"PLAYER_SPECIALIZATION_CHANGED"
 		}, 0.5, "EventHandler"
 	);
 	
@@ -557,6 +558,10 @@ function iGear:ScanBagsForRepCosts(scanBank)
 			current, maximum = _G.GetContainerItemDurability(bag, slot);
 			_, repair = _G.iGearScanTip:SetBagItem(bag, slot);
 			
+			-- as of 5.1, scanning the tooltip doesn't return repaircosts for bank items...
+			-- so we hack around this
+			if( scanBank and not repair ) then repair = 1 end
+			
 			if( current and maximum and repair ) then				
 				repairValue = repairValue + repair; -- add to bag repair costs
 				
@@ -673,7 +678,7 @@ function iGear:UpdateTooltip(tip)
 		end
 	end
 	
-	if( (BagRepairCosts + BankRepairCosts) > 0 ) then
+	if( BagRepairCosts > 0 or BankLowestDurability < 100 ) then -- as of 5.1, we need to check for durability of bank items
 		tip:AddLine(" ");
 		line = tip:AddHeader("");
 		tip:SetCell(line, 1, L["Inventory"], nil, "LEFT", 0);
@@ -689,10 +694,10 @@ function iGear:UpdateTooltip(tip)
 			end
 		end
 		
-		if( BankRepairCosts > 0 ) then
+		if( BankLowestDurability < 100 ) then
 			text_slot = (COLOR_GOLD):format(L["At Bank"]);
 			text_durability = self:FormatDurability(BankLowestDurability);
-			text_costs = self:FormatMoney(BankRepairCosts);
+			text_costs = "";--self:FormatMoney(BankRepairCosts);
 			
 			line = tip:AddLine(text_slot, "", text_durability, text_costs);
 			if( conflicts_norep == 0 ) then
