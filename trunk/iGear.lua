@@ -669,6 +669,11 @@ function iGear:UpdateTooltip(tip)
 	local conflicts_norep = self:GetNumConflicts("repair", true);
 	tip:SetColumnLayout(4, "LEFT", "LEFT", "LEFT", "RIGHT");
 	
+	if( LibStub("iLib"):IsUpdate(AddonName) ) then
+		line = tip:AddHeader("");
+		tip:SetCell(line, 1, "|cffff0000"..L["Addon update available!"].."|r", nil, "CENTER", 0);
+	end
+	
 	line = tip:AddHeader("");
 	tip:SetCell(line, 1, L["Equip"], nil, "LEFT", 0);
 	
@@ -751,12 +756,6 @@ function iGear:UpdateTooltip(tip)
 				tip:SetLineColor(line, c.r, c.g, c.b, 0.4);
 			end
 		end
-	end
-	
-	if( LibStub("iLib"):IsUpdate(AddonName) ) then
-		tip:AddSeparator();
-		line = tip:AddLine("");
-		tip:SetCell(line, 1, "|cffff0000"..L["Addon update available!"].."|r", nil, "CENTER", 0);
 	end
 end
 
