@@ -596,12 +596,38 @@ function iGear:FormatDurability(durability)
 	return ("|cff%s%d%%|r"):format(LibCrayon:GetThresholdHexColor(durability, 100), durability);
 end
 
-function iGear:FormatMoney(value, standing)
-	local discount = self:GetRepairDiscount(standing);
-	
-	value = value * discount;
-	
-	return _G.GetMoneyString(value);
+do
+	local ICON_GOLD   = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:0:1|t";
+	local ICON_SILVER = "|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:0:1|t";
+	local ICON_COPPER = "|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:0:1|t";
+
+	function iGear:FormatMoney(money, standing)
+		local discount = self:GetRepairDiscount(standing);
+		
+		-- add discount by reputation
+		money = money * discount;
+		
+		local str, gold, silver, copper;
+		money = floor(money); -- round up money
+		
+		-- borrowed the code from iMoney
+		gold = floor(money / (100 * 100));
+		silver = floor((money - (gold * 100 * 100)) / 100);
+		copper = mod(money, 100);
+		
+			str	= (gold > 0 and _G.BreakUpLargeNumbers(gold).." "..ICON_GOLD or "")..
+					  ((silver > 0 and gold > 0) and " " or "")..
+						(silver > 0 and (silver < 10 and "0" or "")..silver.." "..ICON_SILVER or "")..
+						((copper > 0 and silver > 0) and " " or "")..
+						(copper > 0 and (copper < 10 and "0" or "")..copper.." "..ICON_COPPER or "");
+		
+		-- this may happen, tricky one!			
+		if( str == "" ) then
+			str = copper.." "..ICON_COPPER;
+		end
+		
+		return str;
+	end
 end
 
 function iGear:GetRepairDiscount(standing, returnStanding)
