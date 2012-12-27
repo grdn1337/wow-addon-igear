@@ -52,30 +52,31 @@ local COLOR_GOLD = "|cfffed100%s|r";
 --  - b  9: indicates whether an item is equipped in the slot
 --  - s 10: stores the itemlink of the weared item in this slot
 --  - b 11: indicates whether the slot must be equipped or not
---  - b 12: indicates whether the Slot is used by the class or not
 local EquipSlots = {
---   1           				2  3      4  5  6  7      8  9      10, 11		 12
-	{"HeadSlot",					0, true,  0, 0, 0, false, 0, false, "", true,  true},	-- 1
-	{"NeckSlot",					0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 2
-	{"ShoulderSlot",			0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 3
-	{"BackSlot",					0, false, 0, 0, 0, true,  0, false, "", true,  true},	-- 4
-	{"ChestSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 5
+--   1           				2  3      4  5  6  7      8  9      10, 11
+	{"HeadSlot",					0, true,  0, 0, 0, false, 0, false, "", true},	-- 1
+	{"NeckSlot",					0, false, 0, 0, 0, false, 0, false, "", true},	-- 2
+	{"ShoulderSlot",			0, true,  0, 0, 0, true,  0, false, "", true},	-- 3
+	{"BackSlot",					0, false, 0, 0, 0, true,  0, false, "", true},	-- 4
+	{"ChestSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 5
 	--{"ShirtSlot" ... }
 	--{"TabardSlot" ... }
-	{"WristSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 6
-	{"HandsSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 7
-	{"WaistSlot",					0, true,  0, 0, 0, false, 0, false, "", true,  true},	-- 8
-	{"LegsSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 9
-	{"FeetSlot",					0, true,  0, 0, 0, true,  0, false, "", true,  true},	-- 10
-	{"Finger0Slot",				0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 11
-	{"Finger1Slot",				0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 12
-	{"Trinket0Slot",			0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 13
-	{"Trinket1Slot",			0, false, 0, 0, 0, false, 0, false, "", true,  true},	-- 14
-	{"MainHandSlot",			0, true,  0, 0, 0, true,  0, false, "", false, false},-- 15
-	{"SecondaryHandSlot",	0, true,  0, 0, 0, true,  0, false, "", false, false},-- 16
+	{"WristSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 6
+	{"HandsSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 7
+	{"WaistSlot",					0, true,  0, 0, 0, false, 0, false, "", true},	-- 8
+	{"LegsSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 9
+	{"FeetSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 10
+	{"Finger0Slot",				0, false, 0, 0, 0, false, 0, false, "", true},	-- 11
+	{"Finger1Slot",				0, false, 0, 0, 0, false, 0, false, "", true},	-- 12
+	{"Trinket0Slot",			0, false, 0, 0, 0, false, 0, false, "", true},	-- 13
+	{"Trinket1Slot",			0, false, 0, 0, 0, false, 0, false, "", true},	-- 14
+	{"MainHandSlot",			0, true,  0, 0, 0, true,  0, false, "", true},	-- 15
+	{"SecondaryHandSlot",	0, true,  0, 0, 0, true,  0, false, "", false},	-- 16
 	-- the ranged slot got completely removed
 	--{"RangedSlot",				0, true,  0, 0, 0, true,  0, false, "", false, false}	-- 17
 };
+
+ES=EquipSlots;
 
 do
 	local mt = {
@@ -91,7 +92,6 @@ do
 			elseif( k == "equipped" ) then return t[9]
 			elseif( k == "link" ) then return t[10]
 			elseif( k == "mustEquip" ) then return t[11]
-			elseif( k == "used" ) then return t[12]
 			end
 		end,
 		__newindex = function(t, k, v)
@@ -106,8 +106,7 @@ do
 			elseif( k == "enchant" ) then slot = 8
 			elseif( k == "equipped" ) then slot = 9
 			elseif( k == "link" ) then slot = 10
-			elseif( k == "mustEquip" ) then slot = 11
-			-- 12: what the hell...?!
+			elseif( k == "mustEquip" ) then slot = 11;
 			end
 			
 			if( slot ) then
@@ -210,7 +209,6 @@ function iGear:EventHandler()
 	
 	local isEquipped, repCosts, durability, enchant;
 	
-	self:CheckWeaponSlots();
 	self:ScanBagsForRepCosts();
 	if( isBanking ) then
 		self:ScanBagsForRepCosts(true);
@@ -248,6 +246,8 @@ function iGear:EventHandler()
 			slot.gemsEmpty = self:GetNumMissingGems(slot);
 		end
 	end
+	
+	self:CheckWeaponSlots();
 	
 	self:UpdateBroker();
 	self:CheckTooltips("Main");
@@ -341,45 +341,86 @@ do
 	local MH = EquipSlots[15];
 	local OH = EquipSlots[16];
 	
-	-- Two Hand OR Main/Off Hand:	Warrior, Paladin, DeathKnight, Priest, Mage, Warlock, Druid, Shaman, Monk
-	-- Just Mainhand:							Hunter
-	-- Main/Off Hand:							Rogue
-	
+	local function check_weapon(invtype)
+		local mainhand = select(9, _G.GetItemInfo(MH.link));
+		
+		-- data is not fully loaded
+		if( MH.equipped and not mainhand ) then
+			print("No full load")
+			LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 0.5, iGear); -- didn't want to add AceTimer to my addon object
+			return false;
+		end
+		
+		return mainhand == invtype;
+	end
+
 	function iGear:CheckWeaponSlots()
-		MH.mustEquip = false;
+		MH.mustEquip = true;
 		OH.mustEquip = false;
 		
-		-----------------------
-		-- these two are easy!
+		-- rogues always need to wear a second weapon
 		if( class == "ROGUE" ) then
-			MH.mustEquip = true;
 			OH.mustEquip = true;
-		elseif( class == "HUNTER" ) then
-			MH.mustEquip = true;
-		--end easiness :D
-		-----------------------
-		else
-			local _, _, _, _, _, _, _, _, mh, _, _ = _G.GetItemInfo(MH.link);
-			
-			if( mh == "INVTYPE_2HWEAPON" ) then
-				MH.mustEquip = true;
-				
-				if( class == "WARRIOR" and _G.GetSpecialization() == 2 ) then -- Furor warriors have TitanGrip
-					OH.mustEquip = true;
+			return;
+		end -- tested
+		
+		local spec = _G.GetSpecialization();
+		local is_twohand = check_weapon("INVTYPE_2HWEAPON");
+		
+		-- fury warriors always can wear two weapons, arms warrior is forced to wear twohand
+		if( class == "WARRIOR" ) then
+			if( spec == 2 ) then -- fury
+				OH.mustEquip = true;
+				return;
+			elseif( spec == 1 and not is_twohand ) then -- arms
+				MH.equipped = false;
+				return;
+			else -- prot
+				OH.mustEquip = true;
+				return;
+			end
+		end -- tested
+		
+		-- hunters are forced to use a ranged weapon in order to use their skills
+		if( class == "HUNTER" ) then
+			if( not check_weapon("INVTYPE_RANGEDRIGHT") ) then
+				MH.equipped = false;
+			end
+			return;
+		end -- tested
+		
+		-- retri paladins need a twohand weapon, all others onehand and shield or at least offhand
+		if( class == "PALADIN" ) then
+			if( spec == 3 ) then -- retri
+				if( not is_twohand ) then
+					MH.equipped = false;
 				end
 			else
-				MH.mustEquip = true;
 				OH.mustEquip = true;
 			end
-			
-			-- mh isn't set, that means the UI isn't fully loaded and values are wrong
-			-- We give the UI half a second to load until we reload this! :)
-			if( not mh ) then
-				LibStub("AceTimer-3.0"):ScheduleTimer(self.EventHandler, 0.5, self); -- didn't want to add AceTimer to my addon object
+			return;
+		end -- tested
+		
+		-- death knights wear twohand weapons, frost may dual weild
+		if( class == "DEATHKNIGHT" ) then
+			if( not is_twohand ) then
+				if( spec == 2 ) then -- frost
+					OH.mustEquip = true;
+				else
+					MH.equipped = false;
+				end
 			end
-		end
+			return;
+		end -- tested
+		
+		-- default rule for all other classes and/or specs
+		-- when not wearing a twohand (staff, ...), something in the offhand is needed
+		if( not is_twohand ) then
+			OH.mustEquip = true;
+		end -- tested on mage
+		
+		-- the last rule is applied on monks, too, since they can choose themselves if they wanna dual weild or not
 	end
-	
 end
 
 -----------------------
