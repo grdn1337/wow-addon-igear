@@ -513,29 +513,35 @@ end
 -- This frame is a fake GameTooltip object which allows us to scan data from it
 _G.CreateFrame("GameTooltip", "iGearScanTip", _G.UIParent, "GameTooltipTemplate");
 
-function iGear:GetNumMissingGems(slot)
-	local stats = _G.GetItemStats(slot.link);
-	if( type(stats) ~= "table" ) then
-		return 0;
-	end
+do
+	local stats = {};
 	
-	local iter, missing = 1, 0;
-	local gem;
-	
-	for k, v in pairs(stats) do
-		if( strsub(k, 0, 12) == 'EMPTY_SOCKET' ) then
-			gem = _G.GetItemGem(slot.link, iter);
-			
-			if( not gem ) then
-				missing = missing + v;
-			end
-			
-			gem = nil;
-			iter = iter + 1;
+	function iGear:GetNumMissingGems(slot)
+		_G.wipe(stats);
+		_G.GetItemStats(slot.link, stats);
+		
+		if( #stats < 1 ) then
+			return 0;
 		end
+		
+		local iter, missing = 1, 0;
+		local gem;
+		
+		for k, num_gems in pairs(stats) do
+			if( k:sub(1, 12) == "EMPTY_SOCKET" ) then
+				for i = 1, num_gems do
+					gem = _G.GetItemGem(slot.link, iter);
+					
+					if( not gem ) then
+						missing = missing + 1;
+					end
+					iter = iter + 1;
+				end
+			end
+		end
+		
+		return missing;
 	end
-	
-	return missing;
 end
 
 function iGear:GetItemEquippedAndCost(slotID)
