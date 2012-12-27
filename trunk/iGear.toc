@@ -1,6 +1,6 @@
 ## Interface: 50100
 ## Title: i|cffffffaaGear|r
-## Version: 2.2.1
+## Version: 2.2.3
 ## Notes: Not just a durability display broker!
 ## Author: grdn
 ## SavedVariables: iGearDB
