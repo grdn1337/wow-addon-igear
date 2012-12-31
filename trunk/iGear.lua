@@ -346,7 +346,6 @@ do
 		
 		-- data is not fully loaded
 		if( MH.equipped and not mainhand ) then
-			print("No full load")
 			LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 0.5, iGear); -- didn't want to add AceTimer to my addon object
 			return false;
 		end
