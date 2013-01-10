@@ -8,6 +8,7 @@ LibStub("AceBucket-3.0"):Embed(iGear);
 
 local L = LibStub("AceLocale-3.0"):GetLocale(AddonName);
 
+local Dialog = LibStub("LibDialog-1.0");
 local LibCrayon = LibStub("LibCrayon-3.0");
 
 local _G = _G;
@@ -19,6 +20,26 @@ local format = _G.string.format;
 
 LibStub("iLib"):Register(AddonName, nil, iGear);
 
+local DialogTable = {
+	text = "",
+	on_show = function(self)
+		if( iGear:MerchantCanGuildRepair() ) then
+			self.buttons[2]:Enable();
+		else
+			self.buttons[2]:Disable();
+		end
+	end,
+	buttons = {
+		{text = _G.PLAYER, on_click = function()
+			iGear:MerchantDoRepair();
+		end},
+		{text = _G.GUILD, on_click = function()
+			iGear:MerchantDoGuildRepair();
+		end},
+		{text = _G.CANCEL},
+	},
+};
+Dialog:Register("iGearRepair", DialogTable);
 
 -----------------------------------------
 -- Variables, functions and colors
@@ -267,9 +288,7 @@ function iGear:MerchantInteraction(isMerchant)
 	if( isRepairing ) then
 		self:MerchantAutoRepair();
 	else
-		if( _G.StaticPopup_FindVisible("IGEAR_AUTOREPAIR") ) then
-			_G.StaticPopup_Hide("IGEAR_AUTOREPAIR");
-		end
+		Dialog:Dismiss("iGearRepair");
 	end
 	
 	self:CheckTooltips("Main");
@@ -287,14 +306,14 @@ function iGear:MerchantAutoRepair()
 			self:MerchantDoRepair();
 		end
 	else
-		_G.StaticPopupDialogs["IGEAR_AUTOREPAIR"].text =
-			("%s\n%s: %s"):format(L["Who is paying the bill?"], L["Total Cost"], self:FormatMoney(RepairCosts + BagRepairCosts));
-		_G.StaticPopup_Show("IGEAR_AUTOREPAIR");
+		DialogTable.text = ("%s\n%s: %s"):format(L["Who is paying the bill?"], L["Total Cost"], self:FormatMoney(RepairCosts + BagRepairCosts));
+		Dialog:Spawn("iGearRepair");
 	end
 end
 
 function iGear:MerchantDoRepair()
 	_G.RepairAllItems();
+	print(L["Total Cost"]..": "..(self:FormatMoney(RepairCosts + BagRepairCosts)));
 end
 
 function iGear:MerchantCanGuildRepair()
@@ -304,6 +323,7 @@ end
 function iGear:MerchantDoGuildRepair()
 	if( self:MerchantCanGuildRepair() ) then
 		_G.RepairAllItems(1);
+		print(L["Total Cost"]..": "..(self:FormatMoney(RepairCosts + BagRepairCosts)));
 		return;
 	end
 	
@@ -804,28 +824,3 @@ function iGear:UpdateTooltip(tip)
 		end
 	end
 end
-
----------------------
--- Final stuff
----------------------
-
-_G.StaticPopupDialogs["IGEAR_AUTOREPAIR"] = {
-	preferredIndex = 3, -- apparently avoids some UI taint
-	button1 = _G.PLAYER,
-	button2 = _G.CANCEL,
-	button3 = _G.GUILD,
-	showAlert = 1,
-	timeout = 0,
-	hideOnEscape = true,
-	OnShow = function(self)
-		if( not iGear:MerchantCanGuildRepair() ) then
-			self.button3:Disable();
-		end
-	end,
-	OnAccept = function()
-		iGear:MerchantDoRepair();
-	end,
-	OnAlt = function()
-		iGear:MerchantDoGuildRepair();
-	end,
-};
