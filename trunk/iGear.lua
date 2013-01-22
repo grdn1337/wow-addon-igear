@@ -323,7 +323,7 @@ end
 function iGear:MerchantDoGuildRepair()
 	if( self:MerchantCanGuildRepair() ) then
 		_G.RepairAllItems(1);
-		print(L["Total Cost"]..": "..(self:FormatMoney(RepairCosts + BagRepairCosts)));
+		print(L["Total Cost"]..": "..(self:FormatMoney(RepairCosts + BagRepairCosts)).." (".._G.GUILD..")");
 		return;
 	end
 	
