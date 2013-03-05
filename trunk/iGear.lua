@@ -539,10 +539,6 @@ do
 		_G.wipe(stats);
 		_G.GetItemStats(slot.link, stats);
 		
-		if( #stats < 1 ) then
-			return 0;
-		end
-		
 		local iter, missing = 1, 0;
 		local gem;
 		
