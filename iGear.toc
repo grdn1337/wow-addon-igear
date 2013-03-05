@@ -1,4 +1,4 @@
-## Interface: 50100
+## Interface: 50200
 ## Title: i|cffffffaaGear|r
 ## Version: 2.2.5
 ## Notes: Not just a durability display broker!
