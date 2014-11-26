@@ -76,17 +76,17 @@ local COLOR_GOLD = "|cfffed100%s|r";
 local EquipSlots = {
 --   1           				2  3      4  5  6  7      8  9      10, 11
 	{"HeadSlot",					0, true,  0, 0, 0, false, 0, false, "", true},	-- 1
-	{"NeckSlot",					0, false, 0, 0, 0, false, 0, false, "", true},	-- 2
-	{"ShoulderSlot",			0, true,  0, 0, 0, true,  0, false, "", true},	-- 3
+	{"NeckSlot",					0, false, 0, 0, 0, true, 0, false, "", true},	-- 2
+	{"ShoulderSlot",			0, true,  0, 0, 0, false,  0, false, "", true},	-- 3
 	{"BackSlot",					0, false, 0, 0, 0, true,  0, false, "", true},	-- 4
-	{"ChestSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 5
+	{"ChestSlot",					0, true,  0, 0, 0, false,  0, false, "", true},	-- 5
 	--{"ShirtSlot" ... }
 	--{"TabardSlot" ... }
-	{"WristSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 6
-	{"HandsSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 7
+	{"WristSlot",					0, true,  0, 0, 0, false,  0, false, "", true},	-- 6
+	{"HandsSlot",					0, true,  0, 0, 0, false,  0, false, "", true},	-- 7
 	{"WaistSlot",					0, true,  0, 0, 0, false, 0, false, "", true},	-- 8
-	{"LegsSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 9
-	{"FeetSlot",					0, true,  0, 0, 0, true,  0, false, "", true},	-- 10
+	{"LegsSlot",					0, true,  0, 0, 0, false,  0, false, "", true},	-- 9
+	{"FeetSlot",					0, true,  0, 0, 0, false,  0, false, "", true},	-- 10
 	{"Finger0Slot",				0, false, 0, 0, 0, false, 0, false, "", true},	-- 11
 	{"Finger1Slot",				0, false, 0, 0, 0, false, 0, false, "", true},	-- 12
 	{"Trinket0Slot",			0, false, 0, 0, 0, false, 0, false, "", true},	-- 13
