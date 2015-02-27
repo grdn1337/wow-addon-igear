@@ -68,7 +68,7 @@ local COLOR_GOLD = "|cfffed100%s|r";
 --  - i  4: the slot durability. Here the current item durability will be stored
 --  - i  5: indicates how much gem slots are empty in the current slot
 --  - i  6: stores the repair costs of the slot
---  + b  7: indicates whether a slot can be enchanted or not
+--  - b  7: indicates whether a slot can be enchanted or not
 --  - i  8: stores the enchant id of the enchant, where 0 means not enchanted
 --  - b  9: indicates whether an item is equipped in the slot
 --  - s 10: stores the itemlink of the weared item in this slot
@@ -123,7 +123,7 @@ do
 			elseif( k == "durability" ) then slot = 4
 			elseif( k == "gemsEmpty" ) then slot = 5
 			elseif( k == "repair" ) then slot = 6
-			-- 7 is set by the author
+			elseif( k == "canEnchant" ) then slot = 7
 			elseif( k == "enchant" ) then slot = 8
 			elseif( k == "equipped" ) then slot = 9
 			elseif( k == "link" ) then slot = 10
@@ -366,12 +366,26 @@ do
 		
 		-- data is not fully loaded
 		if( MH.equipped and not mainhand ) then
-			LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 0.5, iGear); -- didn't want to add AceTimer to my addon object
+			LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 1, iGear); -- didn't want to add AceTimer to my addon object
 			return false;
 		end
 		
 		return mainhand == invtype;
 	end
+	
+	-- check whether or not the player wears a shield (later needed to set "must enchanted" off
+	local function check_offhand(invtype)
+		local offhand = select(9, _G.GetItemInfo(OH.link));
+		
+		-- data is not fully loaded
+		if( OH.equipped and not offhand ) then
+			LibStub("AceTimer-3.0"):ScheduleTimer(iGear.EventHandler, 1, iGear); -- didn't want to add AceTimer to my addon object
+			return false;
+		end
+		
+		return offhand == invtype;
+	end
+
 
 	function iGear:CheckWeaponSlots()
 		MH.mustEquip = true;
@@ -385,6 +399,9 @@ do
 		
 		local spec = _G.GetSpecialization();
 		local is_twohand = check_weapon("INVTYPE_2HWEAPON");
+		
+		-- shields cannot be enchanted!
+		OH.canEnchant = not check_offhand("INVTYPE_SHIELD");
 		
 		-- fury warriors always can wear two weapons, arms warrior is forced to wear twohand
 		if( class == "WARRIOR" ) then
