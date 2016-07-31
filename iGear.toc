@@ -1,6 +1,6 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: i|cffffffaaGear|r
-## Version: 6.2.1
+## Version: 7.0.1
 ## Notes: Not just a durability display broker!
 ## Author: grdn
 ## SavedVariables: iGearDB
