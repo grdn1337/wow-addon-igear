@@ -1,0 +1,9 @@
+## Interface: 80000
+## Title: i|cffffffaaGear|r
+## Version: 8.0.0
+## Notes: Not just a durability display broker!
+## Author: grdn
+## SavedVariables: iGearDB
+## OptionalDeps: Ace3, iLib, LibCrayon-3.0, LibDialog-1.0
+
+includes.xml
