@@ -1,6 +1,6 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: i|cffffffaaGear|r
-## Version: 8.1.0
+## Version: 8.2.0
 ## Notes: Not just a durability display broker!
 ## Author: grdn
 ## SavedVariables: iGearDB
