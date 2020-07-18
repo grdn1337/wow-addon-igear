@@ -192,7 +192,7 @@ function iGear:Boot()
 			"PLAYER_UNGHOST",
 			"PLAYER_EQUIPMENT_CHANGED",
 			"UPDATE_INVENTORY_DURABILITY",
-			"PLAYER_SPECIALIZATION_CHANGED"
+			--"PLAYER_SPECIALIZATION_CHANGED"
 		}, 0.5, "EventHandler"
 	);
 	
@@ -317,7 +317,7 @@ function iGear:MerchantDoRepair()
 end
 
 function iGear:MerchantCanGuildRepair()
-	return (_G.CanGuildBankRepair() and _G.GetGuildBankWithdrawMoney() > (RepairCosts + BagRepairCosts) );
+	return false; --(_G.CanGuildBankRepair() and _G.GetGuildBankWithdrawMoney() > (RepairCosts + BagRepairCosts) );
 end
 
 function iGear:MerchantDoGuildRepair()
@@ -397,25 +397,27 @@ do
 			return;
 		end -- tested
 		
-		local spec = _G.GetSpecialization();
+		-- TODO
+		--local spec = _G.GetSpecialization();
 		local is_twohand = check_weapon("INVTYPE_2HWEAPON");
 		
 		-- shields cannot be enchanted!
 		OH.canEnchant = not check_offhand("INVTYPE_SHIELD");
 		
+		-- TODO
 		-- fury warriors always can wear two weapons, arms warrior is forced to wear twohand
-		if( class == "WARRIOR" ) then
-			if( spec == 2 ) then -- fury
-				OH.mustEquip = true;
-				return;
-			elseif( spec == 1 and not is_twohand ) then -- arms
-				MH.equipped = false;
-				return;
-			else -- prot
-				OH.mustEquip = true;
-				return;
-			end
-		end -- tested
+		-- if( class == "WARRIOR" ) then
+		-- 	if( spec == 2 ) then -- fury
+		-- 		OH.mustEquip = true;
+		-- 		return;
+		-- 	elseif( spec == 1 and not is_twohand ) then -- arms
+		-- 		MH.equipped = false;
+		-- 		return;
+		-- 	else -- prot
+		-- 		OH.mustEquip = true;
+		-- 		return;
+		-- 	end
+		-- end -- tested
 		
 		-- hunters are forced to use a ranged weapon in order to use their skills
 		if( class == "HUNTER" ) then
@@ -426,28 +428,28 @@ do
 		end -- tested
 		
 		-- retri paladins need a twohand weapon, all others onehand and shield or at least offhand
-		if( class == "PALADIN" ) then
-			if( spec == 3 ) then -- retri
-				if( not is_twohand ) then
-					MH.equipped = false;
-				end
-			else
-				OH.mustEquip = true;
-			end
-			return;
-		end -- tested
+		-- if( class == "PALADIN" ) then
+		-- 	if( spec == 3 ) then -- retri
+		-- 		if( not is_twohand ) then
+		-- 			MH.equipped = false;
+		-- 		end
+		-- 	else
+		-- 		OH.mustEquip = true;
+		-- 	end
+		-- 	return;
+		-- end -- tested
 		
 		-- death knights wear twohand weapons, frost may dual weild
-		if( class == "DEATHKNIGHT" ) then
-			if( not is_twohand ) then
-				if( spec == 2 ) then -- frost
-					OH.mustEquip = true;
-				else
-					MH.equipped = false;
-				end
-			end
-			return;
-		end -- tested
+		-- if( class == "DEATHKNIGHT" ) then
+		-- 	if( not is_twohand ) then
+		-- 		if( spec == 2 ) then -- frost
+		-- 			OH.mustEquip = true;
+		-- 		else
+		-- 			MH.equipped = false;
+		-- 		end
+		-- 	end
+		-- 	return;
+		-- end -- tested
 		
 		-- default rule for all other classes and/or specs
 		-- when not wearing a twohand (staff, ...), something in the offhand is needed
